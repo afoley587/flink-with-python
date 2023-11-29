@@ -229,7 +229,7 @@ ARG FLINK_VER=1.18.0 \
 
 RUN apt update -y \
     && apt-get install -y --no-install-recommends \
-    openjdk-17-jdk=17.0.* \
+    openjdk-11-jdk=11.0.* \
     && pip install poetry==$POETRY_VER \
     && mkdir -p /taskscripts /jars /flink \
     && wget -O /flink/flink.tgz https://dlcdn.apache.org/flink/flink-$FLINK_VER/flink-$FLINK_VER-bin-scala_2.12.tgz \
@@ -240,7 +240,7 @@ WORKDIR /taskscripts
 
 COPY poetry.lock pyproject.toml ./
 
-ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-arm64/
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-arm64/
 
 RUN poetry export -f requirements.txt -o requirements.txt --without-hashes \
     && pip install -r requirements.txt \
@@ -264,7 +264,7 @@ ARG FLINK_VER=1.18.0 \
 
 RUN apt update -y \
     && apt-get install -y --no-install-recommends \
-    openjdk-17-jdk=17.0.* \
+    openjdk-11-jdk=11.0.* \
     && pip install poetry==$POETRY_VER \
     && mkdir -p /taskscripts /jars /flink \
     && wget -O /flink/flink.tgz https://dlcdn.apache.org/flink/flink-$FLINK_VER/flink-$FLINK_VER-bin-scala_2.12.tgz \
@@ -279,7 +279,7 @@ WORKDIR /taskscripts
 
 COPY poetry.lock pyproject.toml ./
 
-ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-arm64/
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-arm64/
 
 RUN poetry export -f requirements.txt -o requirements.txt --without-hashes \
     && pip install -r requirements.txt \
@@ -504,6 +504,18 @@ the stream.
 ## Running
 We can run our system with a simple `docker-compose up -d`:
 ```shell
+alexanderfoley@ST-253-MacBook-Pro flink-with-python % docker-compose up -d
+[+] Building 0.0s (0/0)                                                                                                                                                                     docker-container:ci-env
+[+] Running 8/8
+ ✔ Network flink-net                                                                                                                                        Created                                            0.1s 
+ ✔ Container flink-with-python-taskmanager-1                                                                                                                Sta...                                             0.2s 
+ ✔ Container flink-with-python-zookeeper-1                                                                                                                  Start...                                           0.2s 
+ ✔ Container flink-with-python-kafka-1                                                                                                                      Started                                            0.2s 
+ ✔ Container flink-with-python-jobmanager-1                                                                                                                 Star...                                            0.2s 
+ ! zookeeper The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested                                                    0.0s 
+ ✔ Container flink-with-python-dummyproducer-1                                                                                                              S...                                               0.1s 
+ ✔ Container flink-with-python-app-1                                                                                                                        Started                                            0.1s 
+alexanderfoley@ST-253-MacBook-Pro flink-with-python % 
 ```
 Note that the first time this runs, it might take a few seconds to build
 the respective images as the binaries can be a bit big!

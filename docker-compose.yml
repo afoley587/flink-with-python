@@ -38,6 +38,8 @@ services:
   
   app:
     # /flink/bin/flink run -py /taskscripts/app.py
+    # or
+    # /flink/bin/flink run --jarfile /jars/flink-sql-connector-kafka_2.11-1.9.2.jar -py /taskscripts/app.py
     image: flink-app
     build: 
       context: .
