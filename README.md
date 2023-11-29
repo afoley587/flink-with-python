@@ -567,7 +567,7 @@ prompt> cat sink/sink.log/2023-11-29--20/.part-0d2ac5d6-ec07-4429-8e41-f1d989fd2
 We can watch a video of the whole system below:
 ![Video Demo](./images/video-demo.gif)
 
-I hope you enjoyed this blog post! All code can be found [here on GitHub]()!
+I hope you enjoyed this blog post! All code can be found [here on GitHub](https://github.com/afoley587/flink-with-python)!
 
 ## References
 * [Apache Flink](https://nightlies.apache.org/flink/flink-docs-master/)
