@@ -505,15 +505,14 @@ the stream.
 We can run our system with a simple `docker-compose up -d`:
 ```shell
 prompt> docker-compose up -d
-[+] Building 0.0s (0/0)                                                                                                                                                                     docker-container:ci-env
-[+] Running 8/8
- ✔ Network flink-net                                                                                                                                        Created                                            0.1s 
- ✔ Container flink-with-python-taskmanager-1                                                                                                                Sta...                                             0.2s 
- ✔ Container flink-with-python-zookeeper-1                                                                                                                  Start...                                           0.2s 
- ✔ Container flink-with-python-kafka-1                                                                                                                      Started                                            0.2s 
- ✔ Container flink-with-python-jobmanager-1                                                                                                                 Star...                                            0.2s 
- ✔ Container flink-with-python-dummyproducer-1                                                                                                              S...                                               0.1s 
- ✔ Container flink-with-python-app-1                                                                                                                        Started                                            0.1s 
+[+] Building 0.0s (0/0)                                                                    docker-container:ci-env
+[+] Running 6/6
+ ✔ Container flink-with-python-kafka-1          Running                                                       0.0s 
+ ✔ Container flink-with-python-taskmanager-1    Running                                                       0.0s 
+ ✔ Container flink-with-python-zookeeper-1      Running                                                       0.0s 
+ ✔ Container flink-with-python-jobmanager-1     Running                                                       0.0s 
+ ✔ Container flink-with-python-app-1            Running                                                       0.0s 
+ ✔ Container flink-with-python-dummyproducer-1  Started                                                       0.0s 
 prompt> 
 ```
 Note that the first time this runs, it might take a few seconds to build
