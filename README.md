@@ -7,6 +7,8 @@ of those things painlessly and for free? Well, you're in the right place because
 today, we're diving headfirst into the dynamic trio of Apache Flink, Kafka, and PyFlink.
 We will be crafting a story that's as thrilling, informative, and hopefully easy to understand.
 
+![Thumbnail](./images/thumbnail.png)
+
 Let's look at the data we have at hand today. Data doesn't just sit idly in databases anymore.
 It's becoming increasingly common that data flows like a lively river across systems. In recent times,
 we might batch process the data at the receiving end. But, with the rise of 
