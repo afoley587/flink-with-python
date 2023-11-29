@@ -1,7 +1,7 @@
 import os
 
 
-from pyflink.common import Row, Encoder
+from pyflink.common import WatermarkStrategy, Encoder
 from pyflink.common.serialization import SimpleStringSchema
 from pyflink.common.typeinfo import Types
 from pyflink.datastream import StreamExecutionEnvironment
@@ -20,7 +20,7 @@ def kafka_sink_example():
     env = StreamExecutionEnvironment.get_execution_environment()
 
     # the kafka/sql jar is used here as it's a fat jar and could avoid dependency issues
-    env.add_jars("file:///jars/flink-sql-connector-kafka_2.11-1.9.2.jar")
+    env.add_jars("file:///jars/flink-sql-connector-kafka-3.0.1-1.18.jar")
 
     # Define the new kafka source with our docker brokers/topics
     # This creates a source which will listen to our kafka broker
@@ -37,11 +37,13 @@ def kafka_sink_example():
     )
 
     # Adding our kafka source to our environment
-    ds = env.add_source(kafka_source)
+    ds = env.from_source(
+        kafka_source, WatermarkStrategy.no_watermarks(), "Kafka Source"
+    )
 
     # Just count the length of the string. You could get way more complex
     # here
-    ds = ds.map(lambda a: len(a), output_type=Types.ROW([Types.INT()]))
+    ds = ds.map(lambda a: len(a), output_type=Types.INT())
 
     output_path = os.path.join(os.environ.get("SINK_DIR", "/sink"), "sink.log")
 

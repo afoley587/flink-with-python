@@ -37,9 +37,7 @@ services:
       - flink-net
   
   app:
-    # /flink/bin/flink run -py /taskscripts/app.py
-    # or
-    # /flink/bin/flink run --jarfile /jars/flink-sql-connector-kafka_2.11-1.9.2.jar -py /taskscripts/app.py
+    # /flink/bin/flink run -py /taskscripts/app.py --jobmanager jobmanager:8081 --target local
     image: flink-app
     build: 
       context: .
@@ -60,6 +58,7 @@ services:
       - flink-net
 
   dummyproducer:
+    # kafka-console-producer.sh --topic flink-topic --bootstrap-server kafka:9092 < /test.txt
     image: wurstmeister/kafka
     environment:
       KAFKA_ADVERTISED_HOST_NAME: kafka
@@ -71,14 +70,20 @@ services:
     networks:
       - flink-net
     entrypoint:
-      - kafka-console-producer.sh
-    command:
-      - --topic
-      - flink-topic
-      - --bootstrap-server
-      - kafka:9092
-      - < 
-      - /test.txt
+      - tail
+    command: 
+      - -f
+      - /dev/null
+    # entrypoint:
+    #   - kafka-console-producer.sh
+    # command:
+    #   - --topic
+    #   - flink-topic
+    #   - --bootstrap-server
+    #   - kafka:9092
+    #   - < 
+    #   - /test.txt
+    restart: always
     volumes:
       - ./test_files/test_messages.txt:/test.txt:ro
 

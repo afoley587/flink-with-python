@@ -77,7 +77,7 @@ and then we'll discuss all of the other services we've hosted as well.
 import os
 
 
-from pyflink.common import Row, Encoder
+from pyflink.common import WatermarkStrategy, Encoder
 from pyflink.common.serialization import SimpleStringSchema
 from pyflink.common.typeinfo import Types
 from pyflink.datastream import StreamExecutionEnvironment
@@ -96,7 +96,7 @@ def kafka_sink_example():
     env = StreamExecutionEnvironment.get_execution_environment()
 
     # the kafka/sql jar is used here as it's a fat jar and could avoid dependency issues
-    env.add_jars("file:///jars/flink-sql-connector-kafka_2.11-1.9.2.jar")
+    env.add_jars("file:///jars/flink-sql-connector-kafka-3.0.1-1.18.jar")
 
     # Define the new kafka source with our docker brokers/topics
     # This creates a source which will listen to our kafka broker
@@ -113,7 +113,7 @@ def kafka_sink_example():
     )
 
     # Adding our kafka source to our environment
-    ds = env.add_source(kafka_source)
+    ds = env.from_source(kafka_source, WatermarkStrategy.no_watermarks(), "Kafka Source")
 
     # Just count the length of the string. You could get way more complex
     # here
@@ -140,6 +140,7 @@ def kafka_sink_example():
 
 if __name__ == "__main__":
     kafka_sink_example()
+
 ```
 
 Let's walk through the code:
@@ -152,7 +153,7 @@ jars into it with the following lines:
     env = StreamExecutionEnvironment.get_execution_environment()
 
     # the kafka/sql jar is used here as it's a fat jar and could avoid dependency issues
-    env.add_jars("file:///jars/flink-sql-connector-kafka_2.11-1.9.2.jar")
+    env.add_jars("file:///jars/flink-sql-connector-kafka-3.0.1-1.18.jar")
 ```
 
 Next, we define the kafka source. The kafka source essentially creates a kafka
@@ -175,7 +176,7 @@ environment:
     )
 
     # Adding our kafka source to our environment
-    ds = env.add_source(kafka_source)
+    ds = env.from_source(kafka_source, WatermarkStrategy.no_watermarks(), "Kafka Source")
 ```
 
 Then, we need to tell Flink what we will be doing on the data 
@@ -247,11 +248,8 @@ RUN poetry export -f requirements.txt -o requirements.txt --without-hashes \
     && pip install -r requirements.txt \
     && rm -f requirements.txt
 
-ADD https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-kafka_2.11/1.9.2/flink-sql-connector-kafka_2.11-1.9.2.jar /jars
-
+ADD https://repo.maven.apache.org/maven2/org/apache/flink/flink-sql-connector-kafka/3.0.1-1.18/flink-sql-connector-kafka-3.0.1-1.18.jar /jars
 COPY flink_with_python/* ./
-
-ENTRYPOINT ["tail", "-f", "/dev/null"]
 ```
 
 First, we are installing OpenJDK as that is a requirement for flink. Then, we will
@@ -290,15 +288,9 @@ RUN poetry export -f requirements.txt -o requirements.txt --without-hashes \
 And then finally, we copy in the kafka/flink connector and our python app:
 
 ```Dockerfile
-ADD https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-kafka_2.11/1.9.2/flink-sql-connector-kafka_2.11-1.9.2.jar /jars
-
+ADD https://repo.maven.apache.org/maven2/org/apache/flink/flink-sql-connector-kafka/3.0.1-1.18/flink-sql-connector-kafka-3.0.1-1.18.jar /jars
 COPY flink_with_python/* ./
-
-ENTRYPOINT ["tail", "-f", "/dev/null"]
 ```
-
-Note: I added the entrypoint so I can exec into the container and run commands
-manually which will help demonstrate the system!
 
 ## Docker Compose Setup
 
@@ -343,11 +335,9 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     networks:
       - flink-net
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
   
   app:
-    # /flink/bin/flink run -py /taskscripts/app.py
+    # /flink/bin/flink run -py /taskscripts/app.py --jobmanager jobmanager:8081 --target local
     image: flink-app
     build: 
       context: .
@@ -368,6 +358,7 @@ services:
       - flink-net
 
   dummyproducer:
+    # kafka-console-producer.sh --topic flink-topic --bootstrap-server kafka:9092 < /test.txt
     image: wurstmeister/kafka
     environment:
       KAFKA_ADVERTISED_HOST_NAME: kafka
@@ -379,14 +370,20 @@ services:
     networks:
       - flink-net
     entrypoint:
-      - kafka-console-producer.sh
-    command:
-      - --topic
-      - flink-topic
-      - --bootstrap-server
-      - kafka:9092
-      - < 
-      - /test.txt
+      - tail
+    command: 
+      - -f
+      - /dev/null
+    # entrypoint:
+    #   - kafka-console-producer.sh
+    # command:
+    #   - --topic
+    #   - flink-topic
+    #   - --bootstrap-server
+    #   - kafka:9092
+    #   - < 
+    #   - /test.txt
+    restart: always
     volumes:
       - ./test_files/test_messages.txt:/test.txt:ro
 
@@ -451,7 +448,7 @@ dummy producer:
 
 ```yaml
   app:
-    # /flink/bin/flink run -py /taskscripts/app.py
+    # /flink/bin/flink run -py /taskscripts/app.py --jobmanager jobmanager:8081 --target local
     image: flink-app
     build: 
       context: .
@@ -472,6 +469,7 @@ dummy producer:
       - flink-net
 
   dummyproducer:
+    # kafka-console-producer.sh --topic flink-topic --bootstrap-server kafka:9092 < /test.txt
     image: wurstmeister/kafka
     environment:
       KAFKA_ADVERTISED_HOST_NAME: kafka
@@ -483,14 +481,20 @@ dummy producer:
     networks:
       - flink-net
     entrypoint:
-      - kafka-console-producer.sh
-    command:
-      - --topic
-      - flink-topic
-      - --bootstrap-server
-      - kafka:9092
-      - < 
-      - /test.txt
+      - tail
+    command: 
+      - -f
+      - /dev/null
+    # entrypoint:
+    #   - kafka-console-producer.sh
+    # command:
+    #   - --topic
+    #   - flink-topic
+    #   - --bootstrap-server
+    #   - kafka:9092
+    #   - < 
+    #   - /test.txt
+    restart: always
     volumes:
       - ./test_files/test_messages.txt:/test.txt:ro
 ```
@@ -525,15 +529,43 @@ In our browser, let's just view the Flink UI at `http://localhost:8081`:
 Now, let's start our flink app. We will need to exec into the application 
 container and run a command to submit the task to the cluster:
 ```shell
+prompt> docker-compose exec -it app bash           
+root@8ffbf13dac16:/taskscripts# /flink/bin/flink run -py /taskscripts/app.py --jobmanager jobmanager:8081 --target local
+Job has been submitted with JobID 2b295be0bcf602bad43cbee494987cd7
 ```
 
-We should see a new task in our browser:
-![Flink Task](./images/flink-task.png)
+Let's also exec into our producer and send all of the files in the `/test.txt` file:
+```shell
+prompt> docker-compose exec -it dummyproducer bash
+root@b2985a686722:/# kafka-console-producer.sh --topic flink-topic --bootstrap-server kafka:9092 < /test.txt
+```
 
-And finally, we can tail our sink file to see how it changes over the course
+You'll see a new file popped up in the `sink` directory:
+
+```shell
+prompt> ls -larth sink/sink.log/2023-11-29--20 
+total 8
+drwxr-xr-x  3 owner  staff    96B Nov 29 13:38 ..
+drwxr-xr-x  3 owner  staff    96B Nov 29 13:38 .
+-rw-r--r--  1 owner  staff    18B Nov 29 13:38 .part-0d2ac5d6-ec07-4429-8e41-f1d989fd2a80-0.inprogress.fadc1b00-cffc-4464-b2c8-3d94603e8594
+prompt> 
+```
+
+And finally, we can cat our sink file to see how it changed over the course
 of the task!
 ```shell
+prompt> cat sink/sink.log/2023-11-29--20/.part-0d2ac5d6-ec07-4429-8e41-f1d989fd2a80-0.inprogress.fadc1b00-cffc-4464-b2c8-3d94603e8594
+4
+2
+10
+16
+10
+9
+16
 ```
+
+You can send a few more Kafka messages and you'll observe a new `.part-`
+file get generated!
 
 I hope you enjoyed this blog post! All code can be found [here on GitHub]()!
 
