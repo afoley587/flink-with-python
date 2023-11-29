@@ -564,8 +564,8 @@ prompt> cat sink/sink.log/2023-11-29--20/.part-0d2ac5d6-ec07-4429-8e41-f1d989fd2
 16
 ```
 
-You can send a few more Kafka messages and you'll observe a new `.part-`
-file get generated!
+We can watch a video of the whole system below:
+![Video Demo](./images/video-demo.gif)
 
 I hope you enjoyed this blog post! All code can be found [here on GitHub]()!
 
