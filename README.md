@@ -10,14 +10,13 @@ We will be crafting a story that's as thrilling, informative, and hopefully easy
 Let's look at the data we have at hand today. Data doesn't just sit idly in databases anymore.
 It's becoming increasingly common that data flows like a lively river across systems. In recent times,
 we might batch process the data at the receiving end. But, with the rise of 
-[Flink](https://nightlies.apache.org/flink/flink-docs-master/), we can
-begin to process this data in real time without adding extra load on our end systems.
+Flink, we can begin to process this data in real time without adding extra load on our end systems.
 
 Let's discuss some of the terms that we will cover today:
 
 ## Apache Flink
-Flink is truly the unsung hero of stream processing. Forget about batch processing delays; 
-Flink is here to process your data as it arrives, giving you insights on the fly. 
+[Flink](https://nightlies.apache.org/flink/flink-docs-master/) is truly the unsung hero of stream processing. 
+Forget about batch processing delays; Flink is here to process your data as it arrives, giving you insights on the fly. 
 It's like having a data wizard at your disposal, conjuring real-time analytics with the wave of a wand.
 
 So, really, what __is__ Flink? It's a framework and distributed processing engine for 
