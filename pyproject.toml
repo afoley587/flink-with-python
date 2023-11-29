@@ -2,7 +2,7 @@
 name = "flink-with-python"
 version = "0.1.0"
 description = ""
-authors = ["Alexander Foley <afoley@getsporttrade.com>"]
+authors = ["Alexander Foley <alexandergfoley@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
