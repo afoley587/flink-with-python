@@ -1,0 +1,86 @@
+version: '3.7'
+services:
+
+  jobmanager:
+    image: flink:latest
+    networks:
+      - flink-net
+    ports:
+      - 8081:8081
+    environment:
+      FLINK_PROPERTIES: "jobmanager.rpc.address: jobmanager"
+    command:
+      - jobmanager
+
+  taskmanager:
+    image: flink:latest
+    networks:
+      - flink-net
+    environment:
+      FLINK_PROPERTIES: "jobmanager.rpc.address: jobmanager"
+    command:
+      - taskmanager
+    
+  zookeeper:
+    image: wurstmeister/zookeeper
+    networks:
+      - flink-net
+
+  kafka:
+    image: wurstmeister/kafka
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_CREATE_TOPICS: "flink-topic:1:1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    networks:
+      - flink-net
+  
+  app:
+    # /flink/bin/flink run -py /taskscripts/app.py
+    image: flink-app
+    build: 
+      context: .
+    environment: 
+      KAFKA_BROKER: kafka:9092
+      KAFKA_TOPIC: flink-topic
+      SINK_DIR: /sink
+    depends_on:
+      - kafka
+    volumes:
+      - ./sink:/sink
+    entrypoint:
+      - tail
+    command: 
+      - -f
+      - /dev/null
+    networks:
+      - flink-net
+
+  dummyproducer:
+    image: wurstmeister/kafka
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_CREATE_TOPICS: "flink-topic:1:1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    depends_on:
+      - kafka
+    networks:
+      - flink-net
+    entrypoint:
+      - kafka-console-producer.sh
+    command:
+      - --topic
+      - flink-topic
+      - --bootstrap-server
+      - kafka:9092
+      - < 
+      - /test.txt
+    volumes:
+      - ./test_files/test_messages.txt:/test.txt:ro
+
+networks:
+  flink-net:
+    external: false
+    name: flink-net
