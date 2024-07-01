@@ -1,6 +1,6 @@
 FROM python:3.9.18-bullseye
 
-ARG FLINK_VER=1.18.0 \
+ARG FLINK_VER=1.18.1 \
     POETRY_VER=1.6.1
 
 RUN apt update -y \
